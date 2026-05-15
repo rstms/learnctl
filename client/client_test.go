@@ -2,6 +2,8 @@ package client
 
 import (
 	"github.com/stretchr/testify/require"
+	"log"
+	"os"
 	"testing"
 )
 
@@ -16,4 +18,13 @@ func TestPing(t *testing.T) {
 	client := initTestClient(t)
 	err := client.Ping()
 	require.Nil(t, err)
+}
+
+func TestClasses(t *testing.T) {
+	client := initTestClient(t)
+	address := os.Getenv("TEST_ADDRESS")
+	require.NotEmpty(t, address)
+	classes, err := client.Classes(address)
+	require.Nil(t, err)
+	log.Println(FormatJSON(classes))
 }

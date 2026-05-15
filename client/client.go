@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
+	"regexp"
 	"strconv"
 	"time"
 )
 
 const VERSION = "0.0.5"
+
+var CLASS_PATTERN = regexp.MustCompile(`^learns_(.*)`)
 
 type LearnClient struct {
 	rdb     *redis.Client
@@ -73,11 +76,14 @@ func (c *LearnClient) Classes(address string) (map[string]int64, error) {
 		return nil, Fatal(err)
 	}
 	for key, value := range classes {
-		count, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return nil, Fatal(err)
+		matches := CLASS_PATTERN.FindStringSubmatch(key)
+		if len(matches) == 2 {
+			count, err := strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				return nil, Fatal(err)
+			}
+			counts[matches[1]] = count
 		}
-		counts[key] = count
 	}
 	return counts, nil
 }
