@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const VERSION = "0.0.1"
+const VERSION = "0.0.2"
 
 type LearnClient struct {
 	rdb     *redis.Client
