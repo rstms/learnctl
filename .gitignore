@@ -1,0 +1,7 @@
+learnctl
+learnctl.exe
+notes
+cruft
+*.core
+*.log
+*postactivate
