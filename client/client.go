@@ -35,6 +35,10 @@ func NewLearnClient(addr string, port int) *LearnClient {
 	return nil
 }
 
+func (c *LearnClient) Close() error {
+	return c.rdb.Close()
+}
+
 func (c *LearnClient) Ping() error {
 	if c.verbose {
 		fmt.Print("ping...")
