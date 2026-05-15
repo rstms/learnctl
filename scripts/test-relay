@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+RELAY_PORT=6379
+TEST_HOST=bitbucket.rstms.net
+
+relay_present() {
+    netstat -an | awk '/^tcp .* LISTEN/{ print $4 }' | awk -v relay_port=$RELAY_PORT -F. '
+	BEGIN { 
+	    exit_code=1;
+	}
+
+	{ 
+	    if ($(NF) == relay_port ) { 
+		exit_code=0; 
+		exit;
+	    }
+	}
+
+	END { 
+	    exit exit_code;
+	}
+    '
+}
+
+start_relay() {
+    ssh -S none -o ExitOnForwardFailure=yes -N -L ${RELAY_PORT}:127.0.0.1:${RELAY_PORT} $TEST_HOST &
+}
+
+stop_relay() {
+    pid=$(fstat | awk "/internet stream tcp 0x0 127.0.0.1:${RELAY_PORT}/{ print \$3;}")
+    if [ -n "$pid" ]; then
+	kill $pid
+    fi
+}
+
+case ${1:-check} in 
+    start) relay_present && true || start_relay;;
+    stop) relay_present && stop_relay || true;;
+    check) relay_present;;
+esac

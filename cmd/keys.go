@@ -31,41 +31,32 @@ POSSIBILITY OF SUCH DAMAGE.
 package cmd
 
 import (
-	"github.com/rstms/learnctl/client"
+	"fmt"
 	"github.com/spf13/cobra"
-	"os"
 )
 
-var cfgFile string
-
-var rootCmd = &cobra.Command{
-	Version: "0.0.1",
-	Use:     "learnctl",
-	Short:   "display and manipulate the RSPAMD learning database",
+var keysCmd = &cobra.Command{
+	Use:   "keys [PATTERN]",
+	Short: "test redis connectivity",
 	Long: `
-Administration commands for monitoring and controlling the RSPAMD learning database
+Connect to the redis server and output all keys matching PATTERN.
 `,
-}
-
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+	Args: cobra.RangeArgs(0, 1),
+	Run: func(cmd *cobra.Command, args []string) {
+		pattern := "*"
+		if len(args) > 0 {
+			pattern = args[0]
+		}
+		client, err := InitClient()
+		cobra.CheckErr(err)
+		keys, err := client.Keys(pattern)
+		cobra.CheckErr(err)
+		for _, key := range keys {
+			fmt.Println(key)
+		}
+	},
 }
 
 func init() {
-	CobraInit(rootCmd)
-	OptionString(rootCmd, "host", "H", "127.0.0.1", "redis hostname")
-	OptionInt(rootCmd, "port", "P", 6379, "redis port")
-	OptionInt(rootCmd, "read-timeout", "r", 60, "read timeout seconds")
-	OptionInt(rootCmd, "write-timeout", "w", 60, "write timeout seconds")
-}
-
-func InitClient() (*client.LearnClient, error) {
-	client := client.NewLearnClient("127.0.0.1", 6379)
-	if client == nil {
-		return nil, Fatalf("client connection failed\n")
-	}
-	return client, nil
+	rootCmd.AddCommand(keysCmd)
 }
