@@ -39,7 +39,7 @@ import (
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Version: "0.0.2",
+	Version: "0.0.3",
 	Use:     "learnctl",
 	Short:   "display and manipulate the RSPAMD learning database",
 	Long: `
